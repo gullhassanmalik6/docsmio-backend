@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://127.0.0.1:5173,http://localhost:5173"
     cookie_secure: bool = False
     cookie_name: str = "docufix_session"
+    library_storage_dir: str = "./storage"
 
     @property
     def cors_origin_list(self) -> list[str]:

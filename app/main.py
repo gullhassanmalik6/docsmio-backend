@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 
 from app.config import get_settings, secret_is_usable
-from app.routers import account, auth, health, history
+from app.routers import account, auth, health, history, library
 
 settings = get_settings()
 if not secret_is_usable(settings.secret_key):
@@ -15,7 +15,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -44,3 +44,4 @@ app.include_router(health.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(account.router, prefix="/api")
 app.include_router(history.router, prefix="/api")
+app.include_router(library.router, prefix="/api")

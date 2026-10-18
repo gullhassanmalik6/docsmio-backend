@@ -1,6 +1,8 @@
 import os
+import tempfile
 
 os.environ["DATABASE_URL"] = "sqlite+pysqlite://"
+os.environ["LIBRARY_STORAGE_DIR"] = tempfile.mkdtemp(prefix="docufix-library-")
 os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["ACCESS_TOKEN_MINUTES"] = "60"
 os.environ["COOKIE_SECURE"] = "false"
@@ -22,10 +24,16 @@ from app.main import app as fastapi_app  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def fresh_database() -> Generator[None, None, None]:
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        Base.metadata.drop_all(bind=connection)
+        connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+        Base.metadata.create_all(bind=connection)
     yield
-    Base.metadata.drop_all(bind=engine)
+    with engine.begin() as connection:
+        connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        Base.metadata.drop_all(bind=connection)
+        connection.exec_driver_sql("PRAGMA foreign_keys=ON")
 
 
 @pytest.fixture

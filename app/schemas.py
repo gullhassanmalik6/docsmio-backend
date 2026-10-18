@@ -72,3 +72,51 @@ class HistoryPage(BaseModel):
     total: int
     download_available: bool = False
     note: str = "These records describe completed work. The processed file stays in this browser and is not stored on the server."
+
+
+class LibraryFolderPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    parent_id: uuid.UUID | None
+    system_key: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class LibraryFolderCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=80)
+    parent_id: uuid.UUID | None = None
+
+
+class LibraryFolderUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    parent_id: uuid.UUID | None = None
+
+
+class LibraryDocumentPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    folder_id: uuid.UUID
+    filename: str
+    mime_type: str
+    size: int
+    favorite: bool
+    classification_key: str | None
+    classification_method: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class LibraryDocumentUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    filename: str | None = Field(default=None, min_length=1, max_length=180)
+    folder_id: uuid.UUID | None = None
+    favorite: bool | None = None
