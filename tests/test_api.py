@@ -42,7 +42,7 @@ def test_login_cookie_and_logout_invalidates_the_session(client):
     logged_in = client.post("/api/auth/login", json={"email": "ada@example.com", "password": "correct-horse"})
     assert logged_in.status_code == 200
     assert client.get("/api/auth/me").status_code == 200
-    token = client.cookies.get("docufix_session")
+    token = client.cookies.get("docsmio_session")
     assert token
     assert client.post("/api/auth/logout").status_code == 204
     client.cookies.clear()
@@ -70,7 +70,7 @@ def test_bearer_token_works_and_plan_cannot_be_supplied(client):
     )
     assert rejected.status_code == 422
     created = register(client)
-    token = created.cookies.get("docufix_session")
+    token = created.cookies.get("docsmio_session")
     client.cookies.clear()
     me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
     assert me.status_code == 200

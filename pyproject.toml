@@ -1,7 +1,7 @@
 [project]
-name = "docufix-api"
+name = "docsmio-api"
 version = "1.0.0"
-description = "DocuFix account, entitlement, and file-history API"
+description = "Docsmio account, entitlement, and file-history API"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.6",

@@ -1,4 +1,4 @@
-# DocuFix API
+# Docsmio API
 
 Account, plan, and file-history service. Image and PDF processing stay in the browser. History records do not include document bytes. The online library stores a file only after an authenticated upload, in `LIBRARY_STORAGE_DIR`, and checks that the file belongs to the signed-in user.
 

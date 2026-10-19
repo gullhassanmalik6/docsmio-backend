@@ -2,7 +2,7 @@ import os
 import tempfile
 
 os.environ["DATABASE_URL"] = "sqlite+pysqlite://"
-os.environ["LIBRARY_STORAGE_DIR"] = tempfile.mkdtemp(prefix="docufix-library-")
+os.environ["LIBRARY_STORAGE_DIR"] = tempfile.mkdtemp(prefix="docsmio-library-")
 os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["ACCESS_TOKEN_MINUTES"] = "60"
 os.environ["COOKIE_SECURE"] = "false"

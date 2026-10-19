@@ -10,7 +10,7 @@ from app.routers import account, auth, health, history, library
 settings = get_settings()
 if not secret_is_usable(settings.secret_key):
     raise RuntimeError("Set SECRET_KEY to a random string of at least 24 characters. The example value is not safe to run.")
-app = FastAPI(title="DocuFix API", version="1.0.0")
+app = FastAPI(title="Docsmio API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
