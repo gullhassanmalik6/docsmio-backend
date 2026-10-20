@@ -92,6 +92,13 @@ def revoke_session(db: Session, token: str) -> None:
 
 
 def public_user(user: User) -> dict:
+    from sqlalchemy.orm import object_session
+
+    from app.entitlements import storage_quota
+    from app.library_service import storage_used
+
+    database = object_session(user)
+    used = storage_used(database, user) if database is not None else 0
     return {
         "id": user.id,
         "name": user.name,
@@ -102,6 +109,15 @@ def public_user(user: User) -> dict:
         "history_limit": history_limit(user.plan),
         "features": features_for(user.plan),
         "billing_connected": False,
+        "audience": user.audience,
+        "timezone_name": user.timezone_name,
+        "onboarding_completed": user.onboarding_completed,
+        "notify_in_app": user.notify_in_app,
+        "notify_email": user.notify_email,
+        "quiet_start": user.quiet_start,
+        "quiet_end": user.quiet_end,
+        "storage_used_bytes": used,
+        "storage_quota_bytes": storage_quota(user.plan),
     }
 
 

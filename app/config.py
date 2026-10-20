@@ -13,6 +13,17 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     cookie_name: str = "docsmio_session"
     library_storage_dir: str = "./storage"
+    app_env: str = "development"
+    auth_rate_limit: int = 30
+    auth_rate_window_seconds: int = 300
+    reminder_loop: bool = True
+    reminder_cron_token: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_tls: bool = True
 
     @property
     def cors_origin_list(self) -> list[str]:

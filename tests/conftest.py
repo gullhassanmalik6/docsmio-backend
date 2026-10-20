@@ -7,6 +7,9 @@ os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["ACCESS_TOKEN_MINUTES"] = "60"
 os.environ["COOKIE_SECURE"] = "false"
 os.environ["CORS_ORIGINS"] = "http://127.0.0.1:5173"
+os.environ["AUTH_RATE_LIMIT"] = "1000"
+os.environ["REMINDER_LOOP"] = "false"
+os.environ["APP_ENV"] = "test"
 
 from collections.abc import Generator
 
@@ -39,4 +42,5 @@ def fresh_database() -> Generator[None, None, None]:
 @pytest.fixture
 def client() -> Generator[TestClient, None, None]:
     with TestClient(fastapi_app) as test_client:
+        test_client.headers.update({"X-Docsmio-Request": "1"})
         yield test_client

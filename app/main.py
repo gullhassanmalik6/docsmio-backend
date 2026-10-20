@@ -1,3 +1,6 @@
+import asyncio
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,19 +8,64 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 
 from app.config import get_settings, secret_is_usable
-from app.routers import account, auth, health, history, library
+from app.routers import account, auth, health, history, library, reminders, sharing
 
 settings = get_settings()
 if not secret_is_usable(settings.secret_key):
     raise RuntimeError("Set SECRET_KEY to a random string of at least 24 characters. The example value is not safe to run.")
-app = FastAPI(title="Docsmio API", version="1.0.0")
+if settings.app_env == "production" and not settings.cookie_secure:
+    raise RuntimeError("COOKIE_SECURE must be true when APP_ENV is production.")
+
+
+def _dispatch_once() -> None:
+    from app.database import SessionLocal
+    from app.reminders import dispatch_due
+
+    database = SessionLocal()
+    try:
+        dispatch_due(database)
+    except Exception:
+        database.rollback()
+    finally:
+        database.close()
+
+
+async def _reminder_loop() -> None:
+    while True:
+        await asyncio.to_thread(_dispatch_once)
+        await asyncio.sleep(60)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    task = asyncio.create_task(_reminder_loop()) if get_settings().reminder_loop else None
+    yield
+    if task is not None:
+        task.cancel()
+
+
+app = FastAPI(title="Docsmio API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-Docsmio-Request", "X-Reminder-Token"],
 )
+
+
+@app.middleware("http")
+async def protect_cookie_requests(request: Request, call_next):
+    if request.method in {"POST", "PATCH", "PUT", "DELETE"} and request.cookies.get(settings.cookie_name):
+        bearer = request.headers.get("authorization", "").lower().startswith("bearer ")
+        if not bearer and request.headers.get("x-docsmio-request") != "1":
+            return JSONResponse(status_code=403, content={"detail": "This request was rejected. Refresh the page and try again."})
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    if request.url.path.startswith("/api"):
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
 
 
 @app.exception_handler(HTTPException)
@@ -45,3 +93,5 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(account.router, prefix="/api")
 app.include_router(history.router, prefix="/api")
 app.include_router(library.router, prefix="/api")
+app.include_router(reminders.router, prefix="/api")
+app.include_router(sharing.router, prefix="/api")

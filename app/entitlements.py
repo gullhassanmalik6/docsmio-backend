@@ -10,9 +10,15 @@ HISTORY_LIMITS = {
 }
 
 PLAN_FEATURES = {
-    PLAN_FREE: ["browser_tools", "local_downloads", "account_history"],
-    PLAN_PRO: ["browser_tools", "local_downloads", "account_history", "extended_history"],
-    PLAN_BUSINESS: ["browser_tools", "local_downloads", "account_history", "extended_history", "highest_history"],
+    PLAN_FREE: ["browser_tools", "local_downloads", "account_history", "document_wallet"],
+    PLAN_PRO: ["browser_tools", "local_downloads", "account_history", "document_wallet", "extended_history"],
+    PLAN_BUSINESS: ["browser_tools", "local_downloads", "account_history", "document_wallet", "extended_history", "highest_history"],
+}
+
+STORAGE_QUOTAS = {
+    PLAN_FREE: 100 * 1024 * 1024,
+    PLAN_PRO: 5 * 1024 * 1024 * 1024,
+    PLAN_BUSINESS: 20 * 1024 * 1024 * 1024,
 }
 
 
@@ -22,3 +28,7 @@ def history_limit(plan: str) -> int:
 
 def features_for(plan: str) -> list[str]:
     return list(PLAN_FEATURES.get(plan, PLAN_FEATURES[PLAN_FREE]))
+
+
+def storage_quota(plan: str) -> int:
+    return STORAGE_QUOTAS.get(plan, STORAGE_QUOTAS[PLAN_FREE])
